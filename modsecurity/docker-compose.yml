@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Tu aplicación backend que escucha en el puerto 3000
+  backend-app:
+    image: v1 # Reemplaza con la imagen de tu aplicación
+    container_name: juice-shop
+    ports:
+      - "3000:3000" # Exponemos el puerto 3000 del contenedor al puerto 3000 del host (opcional, si necesitas acceso directo)
+    networks:
+      - waf_network # Conecta a la red compartida
+
+  # El contenedor de ModSecurity-CRS
+  modsecurity-waf:
+    image: owasp/modsecurity-crs:apache # Usa la imagen con Nginx (o apache si lo prefieres)
+    container_name: modsecurity_waf
+    ports:
+      - "8080:8080"   # Mapea el puerto 80 del host al puerto 80 del WAF (donde el WAF escuchará las peticiones externas)
+      - "443:443" # Si planeas usar HTTPS, mapea el 443 también
+    environment:
+      # Configura el backend al que el WAF redirigirá el tráfico
+      # 'backend-app' es el nombre del servicio definido en este mismo docker-compose.yml
+      # El puerto es 3000, como lo especificaste para tu aplicación
+      - BACKEND=http://backend-app:3000 
+      
+      # Opcional: Nivel de paranoia (ajustar según tu aplicación)
+      # PARANOIA=1 es un buen punto de partidapara producción.
+      # PARANOIA=4 es el más estricto, puede generar muchos falsos positivos al inicio.
+      # - PARANOIA=1 
+
+      # Opcional: Desactivar logging si necesitas más rendimiento o para pruebas
+      # - NOLOGGING=1 
+      
+      # Opcional: Nombre del servidor (para logs y configuraciones de Nginx/Apache)
+      # - SERVER_NAME=waf.tudominio.com
+
+    networks:
+      - waf_network # Conecta a la misma red compartida
+
+networks:
+  waf_network: # Define la red que compartirán ambos contenedores
+    driver: bridge
