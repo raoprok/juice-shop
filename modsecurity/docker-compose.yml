@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Tu aplicación backend que escucha en el puerto 3000
   backend-app:
-    image: v1 # Reemplaza con la imagen de tu aplicación
+    image: juice-shop:v1 # Reemplaza con la imagen de tu aplicación
     container_name: juice-shop
     ports:
       - "3000:3000" # Exponemos el puerto 3000 del contenedor al puerto 3000 del host (opcional, si necesitas acceso directo)
